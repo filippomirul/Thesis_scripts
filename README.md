@@ -1,3 +1,3 @@
 # Thesis_scripts
 
-This repo has the only meaning of containing all the scripts necessary to performe the analysis in my Master Thesis. The thesis focus on an annotation of a grepavine varaety (Rkatsiteli), the follow up analysis on transcipt isoforms and differential haplotipic expression.
+This repo contains scripts and files of my Master Thesis ("GENE MODEL PREDICTION AND HAPLOTYPE-RESOLVED ISOFORM DETECTION IN GRAPEVINE"). Matrices of raw counts for both gene and transcript isoforms are present, as also results from differential expression, txt file with commands for the annotation process and others scripts for intermediate analysis.
