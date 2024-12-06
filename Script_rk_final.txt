@@ -1,0 +1,332 @@
+############################ Alignment of ONT reads ################################
+
+eval "$(/iga/scripts/dev_modules/mambaforge/bin/conda shell.bash hook)"
+conda activate minimap2
+
+cd /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT
+minimap2 -x splice -d rkatsiteli_rna.mmi /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta
+
+
+RG example: ID:rk_ONT-cDNA_BH_rep1 SM:rkatsiteli PL:ONT CN:Istituto_di_Genomica_Applicata PU:XXXXXXXXX    DS:ONT-P2Solo    DT:2024-09-04   LB:rkatsiteli_cDNA_library
+
+while read -r RG_ID input_fatq out_bam;do
+
+minimap2 -ax splice -t 16 -L -R '@RG\tID:${RG_ID}\tSM:rkatsiteli\tPL:ONT\tCN:Istituto_di_Genomica_Applicata\tPU:XXXXXXXXX\tDS:ONT-P2Solo\tDT:2024-09-04\tLB:rkatsiteli_cDNA_library' /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_rna.mmi ${input_fastq} 2> alignment_${RG_ID}.log | samtools sort -@ 16 -o ${out_bam}
+
+##########
+input_fastq=/projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/nanopore_all_tissue_rk.fastq.gz
+out_bam=ont_all_tissue_aligned.sorted.bam
+minimap2 -ax splice -t 16 -L /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/rkatsiteli_rna_hap2.mmi ${input_fastq} 2> alignment_all_tissue_hap2.log | samtools sort -@ 16 -o ${out_bam}
+
+samtools index -@ 23 ${out_bam}
+
+input_fastq=/projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/nanopore_all_tissue_rk.fastq.gz
+out_bam=ont_all_tissue_both_hap_aligned.sorted.bam
+minimap2 -ax splice -t 32 -L /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_both_hap.mmi ${input_fastq} 2> alignment_all_tissue_both_hap.log | samtools sort -@ 32 -o ${out_bam}
+
+samtools index -@ 23 ${out_bam}
+
+############
+RG_ID=Berry1_ONT_mRNA_hap2
+input_fastq=/projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/long_nano_1.fastq.gz
+out_bam=rkatsiteli_RkatsBerry1_ONT_mRNA_hap2.aligned.sorted.bam
+minimap2 -ax splice -t 15 -L -R '@RG\tID:${RG_ID}\tSM:rkatsiteli\tPL:ONT\tCN:Istituto_di_Genomica_Applicata\tPU:XXXXXXXXX\tDS:ONT-P2Solo\tDT:2024-09-04\tLB:rkatsiteli_cDNA_library' rkatsiteli_rna_hap2.mmi ${input_fastq} 2> alignment_${RG_ID}.log | samtools sort -@ 16 -o ${out_bam}
+
+samtools index -@ 23 ${out_bam}
+
+###########
+
+samtools index -@ 23 ${out_bam}
+
+echo "Done $RG_ID"
+
+done < read_file.txt
+
+##
+
+minimap2 -ax splice -t 23 -L -R '@RG\tID:RkatsLeaf1\tSM:rkatsiteli\tPL:ONT\tCN:Istituto_di_Genomica_Applicata\tPU:XXXXXXXXX\tDS:ONT-P2Solo\tDT:2024-09-04\tLB:rkatsiteli_cDNA_library' /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_rna.mmi /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/partial_long_reads/long_nano_1.fastq.gz 2> alignment_RkatsLeaf1.log | samtools sort -@ 20 -o /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_leaf1.ONT_mRNA.aligned.sorted.bam
+samtools index -@ 23 /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_leaf1.ONT_mRNA.aligned.sorted.bam
+
+
+minimap2 -ax splice -t ${threads} -L -R "..."\
+/projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_rna.mmi ${infastq} 2> alignment.log | samtools sort -@ ${threads} -o ${output_file_bam};
+
+samtools index -@ ${threads} ${output_file_bam}
+
+####
+
+while read -r RG_ID input_fatq out_bam;do
+
+minimap2 -ax splice -t 22 -L -R "@RG\tID:$RG_ID\tSM:rkatsiteli\tPL:ONT\tCN:Istituto_di_Genomica_Applicata\tPU:XXXXXXXXX\tDS:ONT-P2Solo\tDT:2024-10-28\tLB:rkatsiteli_cDNA_library" /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_both_hap.mmi $input_fastq 2> alignment_$RG_ID.log | samtools sort -@ 22 -o $out_bam
+
+samtools index -@ 22 $out_bam
+
+echo "Done $RG_ID"
+
+done < ../read_file.txt
+
+#####
+
+minimap2 -ax splice -t 32 -L -R '@RG\tID:RkatsTend3\tSM:rkatsiteli\tPL:ONT\tCN:Istituto_di_Genomica_Applicata\tPU:XXXXXXXXX\tDS:ONT-P2Solo\tDT:2024-10-28\tLB:rkatsiteli_cDNA_library' /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_both_hap.mmi /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/partial_long_reads/long_nano_9.fastq.gz 2> alignment_RkatsTend3.log | samtools sort -@ 32 -o /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/both_haps/rkatsiteli_tend3.ONT_mRNA_both_haps.aligned.sorted.bam
+
+#####
+
+######################### Masking ############################
+
+funannotate mask -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta \
+    -o /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/rkatsiteli_v1.0_19chr_hap1.softmask.fasta --cpus 30
+    
+funannotate mask -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta \
+    -o /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/rkatsiteli_v1.0_19chr_hap2.softmask.fasta --cpus 30
+    
+##################### Merging single nano-pore files ###########################
+
+for dir in 1 2 3 4 5 6 7 8 9;do
+
+/projects/novabreed/share/gmagris/software/seqkit scat -j 30 -f /projects/vitis/lanes/sequences/delivery_20240819/fastq_pass/ID3444_${dir}-Rk*/ > /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/long_nano_${dir} 2> log_${dir}.txt
+
+done
+
+for i in 1 2 3 4 5 6 7 8 9;do
+
+mv long_nano_${i} long_nano_${i}.fastq
+gzip long_nano_${i}.fastq
+done
+
+
+/projects/novabreed/share/gmagris/software/seqkit scat -j 30 -g -O fastq -f /projects/vitis/lanes/sequences/delivery_20240819/fastq_pass/unclassified/ > /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/long_nano_unclassified 2> log_unclassified.txt
+
+/projects/novabreed/share/gmagris/software/seqkit scat -j 30 -g -O fastq -f /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/ > /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/nanopore_all_tissue_rk 2> log_all_tissue.txt
+
+mv nanopore_all_tissue_rk nanopore_all_tissue_rk.fastq
+
+gzip nanopore_all_tissue_rk.fastq
+
+
+########################## Training #########################
+
+####### Exports
+
+eval "$(/iga/scripts/dev_modules/mambaforge/bin/conda shell.bash hook)"
+export FUNANNOTATE_DB=/projects/assembly_long_reads/funannotate_db/
+export GENEMARK_PATH=/iga/scripts/dev_modules/mambaforge/envs/funannotate/gmes_linux_64/
+conda activate funannotate
+
+################# HAP 1
+
+cd /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1
+
+funannotate train -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/rkatsiteli_v1.0_19chr_hap1.softmask.fasta \
+    -o training \
+    --left_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_left_reads.fq.gz \
+    --right_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_right_reads.fq.gz \
+    --species "Vitis vinifera" --cpus 31 --no_trimmomatic --no_normalize_reads --max_intronlen 25000
+    
+################ HAP 2 
+
+cd /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2
+
+funannotate train -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/rkatsiteli_v1.0_19chr_hap2.softmask.fasta \
+    -o training \
+    --left_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_left_reads.fq.gz \
+    --right_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_right_reads.fq.gz \
+    --species "Vitis vinifera" --cpus 30 --no_trimmomatic --no_normalize_reads --max_intronlen 25000
+    
+############################### Predict ########################
+  
+
+#### Update old training data with the addition of new nanopore reads
+
+### rk_hap_1 (questo è il codice dell hap 1)
+
+cd /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/
+
+funannotate predict -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/rkatsiteli_v1.0_19chr_hap1.softmask.fasta \
+    -o predict_mo_ONT -w augustus:1 hiq:3 genemark:0 pasa:5 codingquarry:0 snap:1 glimmerhmm:1 proteins:0 transcripts:1 \
+    --rna_bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/trinity.alignments.bam \
+    --pasa_gff /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/pasa/Vitis_vinifera_pasa.assemblies.fasta.transdecoder.genome.gff3 \
+    --transcript_evidence /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/trinity.fasta \
+    --tmpdir /projects/assembly_long_reads/tmp/ --max_intronlen 25000 --optimize_augustus \
+    --species "Vitis vinifera" --cpus 31 --repeats2evm --organism other --busco_db eukaryota
+    
+    
+funannotate predict -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/rkatsiteli_v1.0_19chr_hap2.softmask.fasta \
+    -o predict_no_ONT -w augustus:1 hiq:3 genemark:0 pasa:5 codingquarry:0 snap:1 glimmerhmm:1 proteins:0 transcripts:1 \
+    --rna_bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/trinity.alignments.bam \
+    --pasa_gff /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/pasa/Vitis_vinifera_pasa.assemblies.fasta.transdecoder.genome.gff3 \
+    --transcript_evidence /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/trinity.fasta \
+    --tmpdir /projects/assembly_long_reads/tmp/ --max_intronlen 25000 --optimize_augustus \
+    --species "Vitis vinifera" --cpus 32 --repeats2evm --organism other --busco_db eukaryota
+    
+###### Further trial with stringtie addition gtf
+
+
+funannotate predict -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/rkatsiteli_v1.0_19chr_hap1.softmask.fasta \
+    -o predict_stringtie -w augustus:1 hiq:3 genemark:0 pasa:5 codingquarry:0 snap:1 glimmerhmm:1 proteins:0 transcripts:1 \
+    --rna_bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/trinity.alignments.bam \
+    --pasa_gff /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/pasa/Vitis_vinifera_pasa.assemblies.fasta.transdecoder.genome.gff3 \
+    --stringtie /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/stringtie_rk_hap1_annotation.gtf \
+    --transcript_evidence /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/all_chrs/training/training/trinity.fasta \
+    --tmpdir /projects/assembly_long_reads/tmp/ --max_intronlen 25000 --optimize_augustus \
+    --species "Vitis vinifera" --cpus 15 --repeats2evm --organism other --busco_db eukaryota
+    
+funannotate predict -i /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/rkatsiteli_v1.0_19chr_hap2.softmask.fasta \
+    -o predict_stringtie -w augustus:1 hiq:3 genemark:0 pasa:5 codingquarry:0 snap:1 glimmerhmm:1 proteins:0 transcripts:1 \
+    --rna_bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/trinity.alignments.bam \
+    --pasa_gff /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/pasa/Vitis_vinifera_pasa.assemblies.fasta.transdecoder.genome.gff3 \
+    --stringtie /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/stringtie_rk_hap1_annotation.gtf \
+    --transcript_evidence /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/training_no_ont/training/trinity.fasta \
+    --tmpdir /projects/assembly_long_reads/tmp/ --max_intronlen 25000 --optimize_augustus \
+    --species "Vitis vinifera" --cpus 32 --repeats2evm --organism other --busco_db eukaryota
+    
+    
+funannotate update -i predict_stringtie \
+    --left_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_left_reads.fq.gz \
+    --right_norm /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_right_reads.fq.gz \
+    --no_trimmomatic --cpus 15 --species "Vitis vinifera" --max_intronlen 25000
+
+########## Stats of reads ###############
+
+/projects/novabreed/share/gmagris/software/seqkit stats -a /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_left_reads.fq.gz
+
+num_seqs         sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+99,324,562  12,978,365,149       25    130.7      150  100  146  150        0  150   95.46   88.97   43.9
+
+/projects/novabreed/share/gmagris/software/seqkit stats -a /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/funannotate/normalized_tissue_fastq/merged_normalized_right_reads.fq.gz
+
+num_seqs         sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+99,324,562  12,952,785,615       25    130.4      150  100  146  150        0  149   94.22   86.65  43.74
+
+/projects/novabreed/share/gmagris/software/seqkit stats -a /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/nanopore_all_tissue_rk.fastq.gz
+
+num_seqs         sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+9,328,174  98,465,203,382        3  1,102.3  452,165  787  989  1,318        0  1,174   73.18   54.43  45.24
+
+#PN 
+
+/projects/novabreed/share/gmagris/software/seqkit stats -a /projects/assembly_long_reads/vitis_vinifera/PN40024/gene_prediction/merged_all_tissue_left_normalized.fq.gz
+
+num_seqs         sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+148,498,101  17,682,881,949       25    119.1      150  99  100  150        0  132   97.38   92.89  44.13
+
+/projects/novabreed/share/gmagris/software/seqkit stats -a /projects/assembly_long_reads/vitis_vinifera/PN40024/gene_prediction/merged_all_tissue_right_normalized.fq.gz
+
+num_seqs         sum_len  min_len  avg_len  max_len   Q1   Q2   Q3  sum_gap  N50  Q20(%)  Q30(%)  GC(%)
+148,498,101  17,517,784,446       25      118      150  99  100  150        0  129   95.73    89.3  44.06
+
+
+# RK soft-mask
+-HAP1
+
+num scaffolds: 19
+assembly size: 488,154,983 bp
+masked repeats: 68,698,447 bp (14.07%)
+
+-HAP2
+
+num scaffolds: 19
+assembly size: 489,565,041 bp
+masked repeats: 70,219,543 bp (14.34%)
+
+
+############
+
+#### Isoquant
+
+eval "$(/iga/scripts/dev_modules/mambaforge/bin/conda shell.bash hook)"
+conda activate isoquantv3.4
+
+## HAP 1
+
+run python script
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/Rkatsiteli_hap1_isoquant_input.gff3 \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_*.bam \
+--data_type nanopore -o HAP1 -t 16
+
+## HAP2
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/Rkatsiteli_hap2_isoquant_input.gff3 \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/ont_all_tissue_aligned_hap2.sorted.bam \
+--data_type nanopore -o HAP2 -t 16
+
+## BOTH HAP
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_v1.0_19chr_both_hap.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/Rkatsiteli_both_hap_isoquant_input.gff3 \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/ont_all_tissue_both_hap_aligned.sorted.bam \
+--data_type nanopore -o BOTH_HAP -t 16
+
+## Both already annotated extended
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_v1.0_19chr_both_hap.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/new_both_haps/Rkatsiteli_both_hap_extended.gtf \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/ont_all_tissue_both_hap_aligned.sorted.bam \
+--data_type nanopore -o BOTH_HAP -t 14 --no_model_construction
+
+------
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/alignment_both_hap/rkatsiteli_v1.0_19chr_both_hap.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/new_both_haps/Rkatsiteli_both_haps_ \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/both_haps/rkatsiteli_*.bam \
+--data_type nanopore -o BOTH_HAP_sep_new -t 22 --no_model_construction --transcript_quantification unique_only --gene_quantification with_ambiguous --no_gtf_check &
+
+##### Further
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/Rkatsiteli_hap1_isoquant_input.gff3 \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/alignments/rkatsiteli_v1.0/minimap2/rkatsiteli_rna_ONT/rkatsiteli_*.bam \
+--data_type nanopore -o HAP1_new -t 30 --splice_correction_strategy default_ont --model_construction_strategy default_ont \
+--report_canonical only_canonical --no_gtf_check &
+
+isoquant.py --reference /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta \
+--genedb /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/Rkatsiteli_hap2_isoquant_input.gff3 \
+--bam /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/ont_all_tissue_aligned_hap2.sorted.bam \
+--data_type nanopore -o HAP2_nn -t 19 --splice_correction_strategy default_ont --model_construction_strategy default_ont \
+--report_canonical only_canonical --no_gtf_check &
+
+#### Syri synteny ####
+
+env minimap2
+
+minimap2 -ax asm5 --eqx /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta > out.sam
+
+source /iga/scripts/dev_modules/miniconda3.test/bin/activate
+conda activate syri-plotsr
+
+syri -c ../out.sam -r /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta -q /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta -k -F S
+
+plotsr syri.out /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta -H 8 -W 5
+
+
+#### AGAT ######
+
+module load it/envs/miniconda/3
+source activate agat
+
+agat_convert_sp_gxf2gxf.pl -g /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap1/Rkatsiteli_hap1_extended.gtf -o Rkatsiteli_hap1_full.gff3
+agat_convert_sp_gxf2gxf.pl -g /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/rk_hap2/Rkatsiteli_hap2_extended_annotation.gtf -o Rkatsiteli_hap2_full.gff3
+
+agat_sp_merge_annotations.pl --gff Rkatsiteli_hap1_full.gff3 --gff Rkatsiteli_hap2_full.gff3 --out /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/new_both_haps/Rkatsiteli_both_haps.gff3
+
+
+agat_sp_extract_sequences.pl -g /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/new_both_haps/Rkatsiteli_hap1_mod.gff3 -f /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap1.fasta -t exon --merge -o Rkatsiteli_transcripts_hap1.fasta
+ 
+grep -c ">" Rkatsiteli_proteosome_hap1.fasta
+should == 77128
+
+agat_sp_extract_sequences.pl -g /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/gene_prediction/long_reads_annotation/new_both_haps/Rkatsiteli_hap2_mod.gff3 -f /projects/assembly_long_reads/vitis_vinifera/rkatsiteli/assembly/rkatsiteli_v1.0/rkatsiteli_v1.0_19chr_hap2.fasta -t exon --merge -o Rkatsiteli_transcripts_hap2.fasta
+
+grep -c ">" Rkatsiteli_proteosome_hap2.fasta
+should == 80676
+
+#### Orthofinder ####
+
+eval "$(/iga/scripts/dev_modules/mambaforge/bin/conda shell.bash hook)"
+conda activate orthofinder
+
+for f in *fa ; do python /iga/scripts/dev_modules/mambaforge/envs/orthofinder/bin/primary_transcript.py $f ; done
+
+orthofinder -f primary_transcripts/
